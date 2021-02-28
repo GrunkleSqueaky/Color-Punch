@@ -25,7 +25,7 @@ public class ColorPunchScript : ModuleScript
     {
         Needy.Assign(onNeedyActivation: OnNeedyActivation,
             onNeedyDeactivation: OnNeedyDeactivation,
-            onTimerExpired: () => delegate () 
+            onTimerExpired: () => delegate ()
             {
                 Needy.HandleStrike();
                 OnNeedyDeactivation().Invoke();
@@ -76,7 +76,7 @@ public class ColorPunchScript : ModuleScript
 
         if ((TextColor)arg1 == _solution)
         {
-            Needy.HandlePass();           
+            Needy.HandlePass();
         }
         else
         {
@@ -85,7 +85,7 @@ public class ColorPunchScript : ModuleScript
 
         OnNeedyDeactivation().Invoke();
 
-        return false;      
+        return false;
     }
 
     private Color ToColor(TextColor textColor)
@@ -109,6 +109,35 @@ public class ColorPunchScript : ModuleScript
 
             default:
                 throw new NotImplementedException("Unexpected TextColor passed into ToColor: {0}".Form(textColor));
+        }
+    }
+
+#pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"Use '!{0} red to press the red button. Abbreviations may be accepted.";
+#pragma warning restore 414
+
+    private IEnumerator ProcessTwitchCommand(string Command)
+    {
+        string[] validColors = new string[] { "RED", "BLUE", "GREEN", "YELLOW", "BLACK", "R", "B", "G", "Y", "K" };
+        string[] parameters = Command.Trim().ToUpperInvariant().Split(' ');
+        int buttonIndex = 0;
+
+        if ((parameters.Length == 2) && ((parameters[0] == "PRESS") || (parameters[0] == "SUBMIT")))
+        {
+            buttonIndex = Array.IndexOf(validColors, parameters[1]) % 5;
+        }
+        else if (parameters.Length == 1)
+        {
+            buttonIndex = Array.IndexOf(validColors, parameters[0]) % 5;
+        }
+        else
+        {
+            yield return "sendtochaterror";
+        }
+        if (buttonIndex > -1)
+        {
+            yield return null;
+            Buttons[buttonIndex].OnInteract();
         }
     }
 
